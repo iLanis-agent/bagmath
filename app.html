@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bag Math - app</title>
+<link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
+<style>
+  :root { --accent: #4a6a5a; }
+  h1 { color: var(--accent); margin-bottom: 0.2em; }
+  .tag { color: var(--accent); font-style: italic; }
+  .card { border: 1px solid #ddd; border-left: 4px solid var(--accent); padding: 1em 1.2em; margin: 1.2em 0; border-radius: 4px; }
+  .big { font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-top: 0.8em; }
+  .err { color: #b00; font-weight: 700; }
+  label { display: block; margin-top: 0.6em; font-size: 0.9em; }
+  input, select { max-width: 12em; }
+  .foot { margin-top: 2.5em; font-size: 0.85em; color: #777; }
+</style>
+</head>
+<body>
+<h1>Bag Math</h1>
+<p class="tag">Comfort truth, pad floor and carry weight - labeled norms, honest arithmetic.</p>
+
+<div class="card">
+  <h3>The comfort truth</h3>
+  <label for="c-rating">Sticker rating (F, lower limit)</label>
+  <input id="c-rating" type="number" step="any" value="20">
+  <p class="big" id="c-out"></p>
+</div>
+
+<div class="card">
+  <h3>The pad floor</h3>
+  <label for="p-low">Expected night low (F)</label>
+  <input id="p-low" type="number" step="any" value="15">
+  <p class="big" id="p-out"></p>
+</div>
+
+<div class="card">
+  <h3>The carry weight</h3>
+  <label for="k-fill">Down fill weight (oz)</label>
+  <input id="k-fill" type="number" step="any" value="20">
+  <p class="big" id="k-out"></p>
+</div>
+
+<p class="foot">Offsets are labeled norms - the sticker is a lower-limit number, and the ground takes its share through the pad.</p>
+
+<script src="engine.js"></script>
+<script>
+function g(id){ return document.getElementById(id); }
+function v(id){ var n = parseFloat(g(id).value); return isNaN(n) ? NaN : n; }
+function show(id, s, bad){ var el = g(id); el.textContent = s; el.className = bad ? "err big" : "big"; }
+
+function runComfort(){
+  var args = [v("c-rating")];
+  var r = BagMath.comfortPlan.apply(null, args);
+  if (r.error) return show("c-out", r.error, true);
+  show("c-out", BagMath.renderComfort.apply(null, [r].concat(args)), false);
+}
+function runPad(){
+  var args = [v("p-low")];
+  var r = BagMath.padPlan.apply(null, args);
+  if (r.error) return show("p-out", r.error, true);
+  show("p-out", BagMath.renderPad.apply(null, [r].concat(args)), false);
+}
+function runCarry(){
+  var args = [v("k-fill")];
+  var r = BagMath.carryPlan.apply(null, args);
+  if (r.error) return show("k-out", r.error, true);
+  show("k-out", BagMath.renderCarry.apply(null, [r].concat(args)), false);
+}
+["c-rating"].forEach(function(id){ g(id).addEventListener("input", runComfort); });
+["p-low"].forEach(function(id){ g(id).addEventListener("input", runPad); });
+["k-fill"].forEach(function(id){ g(id).addEventListener("input", runCarry); });
+runComfort(); runPad(); runCarry();
+</script>
+</body>
+</html>
